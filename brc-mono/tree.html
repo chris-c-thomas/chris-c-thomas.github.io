@@ -1,7 +1,6 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,19 +13,23 @@
       overflow: hidden;
       background-color: #f7f9fc;
     }
+
     svg {
       width: 100vw;
       height: 100vh;
     }
+
     .node circle {
       cursor: pointer;
       stroke-width: 2px;
     }
+
     .node text {
       font-size: 13px;
       -webkit-user-select: none;
       user-select: none;
     }
+
     .link {
       fill: none;
       stroke: #ccc;
@@ -34,120 +37,119 @@
     }
   </style>
 </head>
+
 <body>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
-const width = window.innerWidth;
-const height = window.innerHeight;
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-const svg = d3.select("body").append("svg")
-  .call(d3.zoom().scaleExtent([0.1, 3]).on("zoom", zoomed))
-  .append("g")
-  .attr("transform", `translate(${width / 4},${height / 2})`);
+    const svg = d3.select("body").append("svg")
+      .call(d3.zoom().scaleExtent([0.1, 3]).on("zoom", zoomed))
+      .append("g")
+      .attr("transform", `translate(${width / 4},${height / 2})`);
 
-function zoomed(event) {
-  svg.attr("transform", event.transform);
-}
+    function zoomed(event) {
+      svg.attr("transform", event.transform);
+    }
 
-const dataUrl = 'https://gist.githubusercontent.com/chris-c-thomas/2a81aa49e4273ab960483651c51db984/raw/b14fe67d571f153c3dac3bc28acdeaf288a6b764/brc-mono-tree.json';
+    const dataUrl = 'https://gist.githubusercontent.com/chris-c-thomas/2a81aa49e4273ab960483651c51db984/raw/b14fe67d571f153c3dac3bc28acdeaf288a6b764/brc-mono-tree.json';
 
 
-d3.json(dataUrl).then(function(data) {
-  const root = d3.hierarchy(data[0], d => d.contents);
-  root.x0 = 0;
-  root.y0 = 0;
+    d3.json(dataUrl).then(function (data) {
+      const root = d3.hierarchy(data[0], d => d.contents);
+      root.x0 = 0;
+      root.y0 = 0;
 
-  root.descendants().forEach((d, i) => {
-    d.id = i;
-    d._children = d.children;
-    if (d.depth > 0) d.children = null;  // Start collapsed except root
-  });
-
-  update(root);
-
-  function update(source) {
-    const tree = d3.tree().nodeSize([40, 180]);
-    const nodes = root.descendants();
-    const links = root.links();
-
-    const node = svg.selectAll('.node')
-      .data(nodes = root.descendants(), d => d.id);
-
-    // Enter new nodes
-    const nodeEnter = node.enter().append('g')
-      .attr('class', 'node')
-      .attr('transform', `translate(${source.y0},${source.x0})`)
-      .on('click', (event, d) => {
-        d.children = d.children ? null : d._children;
-        update(d);
+      root.descendants().forEach((d, i) => {
+        d.id = i;
+        d._children = d.children;
+        if (d.depth > 0) d.children = null;  // Start collapsed except root
       });
 
-    nodeEnter.append('circle')
-      .attr('r', 1e-6)
-      .attr('fill', d => d._children ? '#6ea7ff' : '#fff')
-      .attr('stroke', '#2d72d9')
-      .attr('stroke-width', 2);
+      update(root);
 
-    nodeEnter.append('text')
-      .attr('dy', 4)
-      .attr('x', d => d.children || d._children ? -10 : 10)
-      .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
-      .text(d => d.data.name);
+      function update(source) {
+        const tree = d3.tree().nodeSize([40, 180]);
+        const nodes = root.descendants();
+        const links = root.links();
 
-    // Update positions
-    const nodeUpdate = nodeEnter.merge(node);
+        const node = svg.selectAll('.node')
+          .data(nodes = root.descendants(), d => d.id);
 
-    nodeUpdate = nodeEnter.merge(node).transition()
-      .duration(300)
-      .attr('transform', d => `translate(${d.y},${d.x})`);
+        // Enter new nodes
+        const nodeEnter = node.enter().append('g')
+          .attr('class', 'node')
+          .attr('transform', `translate(${source.y0},${source.x0})`)
+          .on('click', (event, d) => {
+            d.children = d.children ? null : d._children;
+            update(d);
+          });
 
-    nodeUpdate = nodeEnter.merge(node);
-    nodeUpdate.select('circle').transition().duration(300)
-      .attr('r', 6)
-      .attr('fill', d => d._children ? '#6ea7ff' : '#fff');
+        nodeEnter.append('circle')
+          .attr('r', 1e-6)
+          .attr('fill', d => d._children ? '#6ea7ff' : '#fff')
+          .attr('stroke', '#2d72d9')
+          .attr('stroke-width', 2);
 
-    // Exit removed nodes
-    const nodeExit = node.exit().transition().duration(300)
-      .attr('transform', `translate(${source.y},${source.x})`)
-      .remove();
+        nodeEnter.append('text')
+          .attr('dy', 4)
+          .attr('x', d => d.children || d._children ? -10 : 10)
+          .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
+          .text(d => d.data.name);
 
-    nodeExit.select('circle').attr('r', 1e-6);
-    nodeExit.select('text').style('fill-opacity', 1e-6);
+        // Update positions
+        let nodeUpdate = nodeEnter.merge(node);
 
-    // Links
-    const link = svg.selectAll('.link')
-      .data(root.links(), d => d.target.id);
+        nodeUpdate.transition()
+          .duration(300)
+          .attr('transform', d => `translate(${d.y},${d.x})`);
 
-    const linkEnter = link.enter().insert('path', "g")
-      .attr('class', 'link')
-      .attr('d', d => {
-        const o = {x: source.x0, y: source.y0};
-        return d3.linkHorizontal().x(d => d.y).y(d => d.x)({source: o, target: o});
-      });
+        nodeUpdate.select('circle').transition().duration(300)
+          .attr('r', 6)
+          .attr('fill', d => d._children ? '#6ea7ff' : '#fff');
 
-    linkEnter.merge(link).transition().duration(300)
-      .attr('d', d3.linkHorizontal()
-        .x(d => d.y)
-        .y(d => d.x));
+        // Exit removed nodes
+        const nodeExit = node.exit().transition().duration(300)
+          .attr('transform', `translate(${source.y},${source.x})`)
+          .remove();
 
-    link.exit().transition().duration(300)
-      .attr('d', d => {
-        const o = {x: source.x, y: source.y};
-        return d3.linkHorizontal().x(d => d.y).y(d => d.x)({source: o, target: o});
-      }).remove();
+        nodeExit.select('circle').attr('r', 1e-6);
+        nodeExit.select('text').style('fill-opacity', 1e-6);
 
-    nodes.forEach(d => {
-      d.x0 = d.x;
-      d.y0 = d.y;
+        // Links
+        const link = svg.selectAll('.link')
+          .data(root.links(), d => d.target.id);
+
+        const linkEnter = link.enter().insert('path', "g")
+          .attr('class', 'link')
+          .attr('d', d => {
+            const o = { x: source.x0, y: source.y0 };
+            return d3.linkHorizontal().x(d => d.y).y(d => d.x)({ source: o, target: o });
+          });
+
+        linkEnter.merge(link).transition().duration(300)
+          .attr('d', d3.linkHorizontal()
+            .x(d => d.y)
+            .y(d => d.x));
+
+        link.exit().transition().duration(300)
+          .attr('d', d => {
+            const o = { x: source.x, y: source.y };
+            return d3.linkHorizontal().x(d => d.y).y(d => d.x)({ source: o, target: o });
+          }).remove();
+
+        nodes.forEach(d => {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+
+        nodeEnter.on('click', (event, d) => {
+          d.children = d.children ? null : d._children;
+          update(d);
+        });
+      }
     });
-
-    // Toggle children on click
-    nodeEnter.on('click', (event, d) => {
-      d.children = d.children ? null : d._children;
-      update(d);
-    });
-  });
-</script>
+  </script>
 </body>
 </html>
-
