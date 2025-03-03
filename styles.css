@@ -1,0 +1,71 @@
+/* Base styles */
+/* CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Noto Sans', Arial, sans-serif;
+    background-color: #121a27;
+}
+
+/* Center content vertically and horizontally */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+}
+
+/* Link styling */
+a {
+    text-decoration: none;
+    color: #0077cc;
+}
+
+a:hover h1 {
+    text-decoration: none;
+    color: #04c8b1;
+}
+
+/* List styling */
+ul, ol {
+    list-style-type: none;
+}
+
+h1 {
+    font-family: 'Poppins', 'Noto Sans', sans-serif;
+    font-size: 5rem;
+    color: #f6f6f6;
+    transition: color 0.3s ease;
+}
+
+li {
+    margin: 1rem 0;
+    font-size: 1.2rem;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+a {
+    font-family: 'Noto Sans', Arial, sans-serif;
+    color: #04c8b1;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #51f7dc;
+}
+
+.hr-line {
+    width: 10%;
+    height: 3px;
+    background-color: #146fed;
+    margin: 10px auto;
+}
