@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BRC Mono Tree Visualization</title>
+  <title>BRC Mono Tree Viz</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
@@ -38,8 +38,7 @@
 
     const treeLayout = d3.tree().size([height - 100, width - 200]);
 
-    // Replace with your hosted JSON URL
-    const dataUrl = 'https://github.com/chris-c-thomas/brc-mono/tree-viz.json';
+    const dataUrl = 'https://gist.githubusercontent.com/chris-c-thomas/2a81aa49e4273ab960483651c51db984/raw/b14fe67d571f153c3dac3bc28acdeaf288a6b764/brc-mono-tree.json';
 
     d3.json(dataUrl).then(function(data) {
       const root = d3.hierarchy(data[0], d => d.contents);
