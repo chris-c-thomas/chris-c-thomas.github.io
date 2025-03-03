@@ -4,14 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BRC Mono Tree Viz</title>
+  <title>BRC Mono Directory Tree Viz</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
+      padding: 0;
       overflow: hidden;
       background-color: #f7f9fc;
+    }
+
+    svg {
+      width: 100vw;
+      height: 100vh;
     }
 
     .node circle {
@@ -21,7 +27,7 @@
     }
 
     .node text {
-      font-size: 14px;
+      font-size: 13px;
       -webkit-user-select: none;
       user-select: none;
     }
@@ -40,24 +46,36 @@
     const height = window.innerHeight;
 
     const svg = d3.select("body").append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .call(d3.zoom().scaleExtent([0.5, 5]).on("zoom", zoomed))
-      .append("g")
-      .attr("transform", "translate(50,50)");
+      .call(d3.zoom().scaleExtent([0.2, 5]).on("zoom", zoomed))
+      .append("g");
 
     function zoomed(event) {
       svg.attr("transform", event.transform);
     }
 
-    const treeLayout = d3.tree().size([height - 100, width - 200]);
-
     const dataUrl = 'https://gist.githubusercontent.com/chris-c-thomas/2a81aa49e4273ab960483651c51db984/raw/b14fe67d571f153c3dac3bc28acdeaf288a6b764/brc-mono-tree.json';
 
     d3.json(dataUrl).then(function (data) {
       const root = d3.hierarchy(data[0], d => d.contents);
-      treeLayout(root);
 
+      // Dynamically set tree size based on node count
+      const treeLayout = d3.tree()
+        .nodeSize([40, 160])(root);
+
+      // Calculate tree height and width
+      let x0 = Infinity;
+      let x1 = -Infinity;
+      root.each(d => {
+        if (d.x > x1) x1 = d.x;
+        if (d.x < x0) x0 = d.x;
+      });
+
+      const treeHeight = x1 - x0;
+
+      // Center the tree horizontally and vertically
+      svg.attr("transform", `translate(${(width / 2) - 80},${(height - treeHeight) / 2 - x0})`);
+
+      // Links
       svg.selectAll('.link')
         .data(root.links())
         .join('path')
@@ -79,7 +97,7 @@
       node.append('text')
         .attr('dx', d => d.children ? -10 : 10)
         .attr('dy', 4)
-        .style('text-anchor', d => d.children ? 'end' : 'start')
+        .attr('text-anchor', d => d.children ? 'end' : 'start')
         .text(d => d.data.name);
     });
   </script>
